@@ -52,30 +52,81 @@ void stagePrint(int n);
 
 int readRecords(struct Record *records);
 
-void printRecordAndDistance(struct Record *record, struct Location *referencePoint);
+void
+printRecordAndDistance(struct Record *record, struct Location *referencePoint);
+
+void
+getMostFrequentDay(struct Record *records, int numRecords, daysOfTheWeek *day,
+                   int *occurrences);
+
+void
+stage1(struct Record *records, struct Location *reference);
+
+void stage2(struct Record *records, int numRecords,
+            struct Location *reference);
+
+void stage3(struct Record *records, int numRecords);
 
 int main() {
     struct Location MelbourneCentral = {
             .lat=MC_LAT,
             .lng=MC_LNG
     };
-
     struct Record records[MAX_RECORDS];
     int numRecords = readRecords(records);
-    stagePrint(1);
-    printRecord(&records[0], &MelbourneCentral);
-    stagePrint(2);
-    int i;
-    for (i = 0; i < numRecords; i++) {
-        printRecordAndDistance(&records[i], &MelbourneCentral);
-    }
+
+    stage1(records, &MelbourneCentral);
+    stage2(records, numRecords, &MelbourneCentral);
+    stage3(records, numRecords);
+
     return 0;
 }
 
-void printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
+void stage3(struct Record *records, int numRecords) {
+    stagePrint(3);
+    printf("Number of accidents: %d\n", numRecords);
+    daysOfTheWeek mostFrequentDay;
+    int occurrences;
+    getMostFrequentDay(records, numRecords, &mostFrequentDay, &occurrences);
+    printf("Day of week with the most accidents: %s (%d accident(s))\n",
+           getDaysOfTheWeekStr(mostFrequentDay), occurrences);
+}
+
+void stage2(struct Record *records, int numRecords,
+            struct Location *reference) {
+    stagePrint(2);
+    int i;
+    for (i = 0; i < numRecords; i++) {
+        printRecordAndDistance(&records[i], reference);
+    }
+}
+
+void stage1(struct Record *records, struct Location *reference) {
+    stagePrint(1);
+    printRecord(&records[0], reference);
+}
+
+void
+getMostFrequentDay(struct Record *records, int numRecords, daysOfTheWeek *day,
+                   int *occurrences) {
+    int dayCount[DAYS_IN_WEEK] = {0};
+    int i;
+    *occurrences = 0;
+    for (i = 0; i < numRecords; i++) {
+        dayCount[records[i].dateTime.dayOfWeek]++;
+        if (dayCount[records[i].dateTime.dayOfWeek] > *occurrences) {
+            *occurrences = dayCount[records[i].dateTime.dayOfWeek];
+            *day = records[i].dateTime.dayOfWeek;
+        }
+    }
+}
+
+void
+printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
     double distance = dist(&record->location, referencePoint);
     assert(distance <= MAX_DIST && distance >= MIN_DIST);
-    printf("Accident: #%d, distance to reference: %2.2lf ", record->ID, distance);
+    printf("Accident: #%d, distance to reference: %05.02lf ", record->ID,
+           distance);
     /* Distance Bar */
     printf("|");
     int i;
@@ -98,13 +149,21 @@ int readRecords(struct Record *records) {
                  &records[i].dateTime.hour,
                  dayOfWeek
     ) == 8) {
-        if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Sunday))) { records[i].dateTime.dayOfWeek = Sunday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Monday))) { records[i].dateTime.dayOfWeek = Monday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Tuesday))) { records[i].dateTime.dayOfWeek = Tuesday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Wednesday))) { records[i].dateTime.dayOfWeek = Wednesday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Thursday))) { records[i].dateTime.dayOfWeek = Thursday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Friday))) { records[i].dateTime.dayOfWeek = Friday; }
-        else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Saturday))) { records[i].dateTime.dayOfWeek = Saturday; }
+        if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Sunday)) == 0) {
+            records[i].dateTime.dayOfWeek = Sunday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Monday)) == 0) {
+            records[i].dateTime.dayOfWeek = Monday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Tuesday)) == 0) {
+            records[i].dateTime.dayOfWeek = Tuesday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Wednesday)) == 0) {
+            records[i].dateTime.dayOfWeek = Wednesday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Thursday)) == 0) {
+            records[i].dateTime.dayOfWeek = Thursday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Friday)) == 0) {
+            records[i].dateTime.dayOfWeek = Friday;
+        } else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Saturday)) == 0) {
+            records[i].dateTime.dayOfWeek = Saturday;
+        }
         i++;
     }
     return i;
@@ -115,7 +174,8 @@ double dist(struct Location *p1, struct Location *p2) {
             squared(sin(toRadian(p2->lat - p1->lat) / 2.0)) +
             cos(toRadian(p1->lat)) * cos(toRadian(p2->lat)) *
             squared(sin(toRadian(p2->lng - p1->lng) / 2.0));
-    double angle_distance = 2.0 * atan2(sqrt(chord_length), sqrt(1.0 - chord_length));
+    double angle_distance =
+            2.0 * atan2(sqrt(chord_length), sqrt(1.0 - chord_length));
     return 6371.0 * angle_distance;
 }
 
@@ -129,10 +189,13 @@ double squared(double x) {
 
 void printRecord(struct Record *record, struct Location *referencePoint) {
     printf("Accident: #%d\n", record->ID);
-    printf("Location: <%lf, %lf>\n", record->location.lat, record->location.lng);
-    printf("Date: %d/%d/%d\n", record->dateTime.day, record->dateTime.month, record->dateTime.year);
-    printf("Time: %d\n", record->dateTime.hour);
-    printf("Distance to reference: %2.2lf\n", dist(&record->location, referencePoint));
+    printf("Location: <%lf, %lf>\n", record->location.lat,
+           record->location.lng);
+    printf("Date: %d/%d/%d\n", record->dateTime.day, record->dateTime.month,
+           record->dateTime.year);
+    printf("Time: %02d\n", record->dateTime.hour);
+    printf("Distance to reference: %05.02lf\n",
+           dist(&record->location, referencePoint));
 }
 
 void stagePrint(int n) {
