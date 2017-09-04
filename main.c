@@ -74,6 +74,7 @@ int main() {
     };
     struct Record records[MAX_RECORDS];
     int numRecords = readRecords(records);
+    assert(numRecords <= MAX_RECORDS && numRecords >= MIN_RECORDS);
 
     stage1(records, &MelbourneCentral);
     stage2(records, numRecords, &MelbourneCentral);
@@ -133,6 +134,7 @@ printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
     for (i = 0; i < ceil(distance); i++) {
         printf(i == 0 || i % 10 ? "-" : "+");
     }
+
     printf("\n");
 }
 
@@ -220,5 +222,6 @@ char *getDaysOfTheWeekStr(daysOfTheWeek day) {
         case Saturday:
             return "Saturday";
     }
-    assert(0 && "Error: Invalid day");
+    assert(!"Error: Invalid day");
+    return NULL;
 }
