@@ -11,6 +11,8 @@
 #define MC_LNG -37.810592
 #define MAX_DOW_LEN 9
 #define DAYS_IN_WEEK 7
+#define MIN_DIST 0
+#define MAX_DIST 100
 
 
 struct Location {
@@ -48,7 +50,9 @@ void printRecord(struct Record *record, struct Location *referencePoint);
 
 void stagePrint(int n);
 
-void readRecords(struct Record *records);
+int readRecords(struct Record *records);
+
+void printRecordAndDistance(struct Record *record, struct Location *referencePoint);
 
 int main() {
     struct Location MelbourneCentral = {
@@ -57,13 +61,31 @@ int main() {
     };
 
     struct Record records[MAX_RECORDS];
-    readRecords(records);
+    int numRecords = readRecords(records);
     stagePrint(1);
     printRecord(&records[0], &MelbourneCentral);
+    stagePrint(2);
+    int i;
+    for (i = 0; i < numRecords; i++) {
+        printRecordAndDistance(&records[i], &MelbourneCentral);
+    }
     return 0;
 }
 
-void readRecords(struct Record *records) {
+void printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
+    double distance = dist(&record->location, referencePoint);
+    assert(distance <= MAX_DIST && distance >= MIN_DIST);
+    printf("Accident: #%d, distance to reference: %2.2lf ", record->ID, distance);
+    /* Distance Bar */
+    printf("|");
+    int i;
+    for (i = 0; i < ceil(distance); i++) {
+        printf(i == 0 || i % 10 ? "-" : "+");
+    }
+    printf("\n");
+}
+
+int readRecords(struct Record *records) {
     int i = 0;
     char dayOfWeek[MAX_DOW_LEN + 1]; /* +1 for null byte */
     while (scanf("%d %lf %lf %d/%d/%d %d %s",
@@ -85,7 +107,7 @@ void readRecords(struct Record *records) {
         else if (strcmp(dayOfWeek, getDaysOfTheWeekStr(Saturday))) { records[i].dateTime.dayOfWeek = Saturday; }
         i++;
     }
-
+    return i;
 }
 
 double dist(struct Location *p1, struct Location *p2) {
