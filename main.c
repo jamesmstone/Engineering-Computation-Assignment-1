@@ -89,8 +89,6 @@ void readRecords(struct Record *records) {
 }
 
 double dist(struct Location *p1, struct Location *p2) {
-    printf("Location P1: <%lf, %lf>\n", p1->lat, p1->lng);
-    printf("Location P2: <%lf, %lf>\n", p2->lat, p2->lng);
     double chord_length =
             squared(sin(toRadian(p2->lat - p1->lat) / 2.0)) +
             cos(toRadian(p1->lat)) * cos(toRadian(p2->lat)) *
