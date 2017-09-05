@@ -6,9 +6,9 @@
 #define MAX_RECORDS 99
 #define MIN_RECORDS 1
 #define PI_RAD 3.14159
-#define PI_DEG 180
-#define MC_LAT 144.963123
-#define MC_LNG -37.810592
+#define PI_DEG 180.0
+#define MC_LAT -37.810592
+#define MC_LNG 144.963123
 #define MAX_DOW_LEN 9
 #define DAYS_IN_WEEK 7
 #define MIN_DIST 0
@@ -132,7 +132,7 @@ printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
     printf("|");
     int i;
     for (i = 0; i < ceil(distance); i++) {
-        printf(i == 0 || i % 10 ? "-" : "+");
+        printf((i + 1) % 10 ? "-" : "+");
     }
 
     printf("\n");
@@ -143,8 +143,8 @@ int readRecords(struct Record *records) {
     char dayOfWeek[MAX_DOW_LEN + 1]; /* +1 for null byte */
     while (scanf("%d %lf %lf %d/%d/%d %d %s",
                  &records[i].ID,
-                 &records[i].location.lat,
                  &records[i].location.lng,
+                 &records[i].location.lat,
                  &records[i].dateTime.day,
                  &records[i].dateTime.month,
                  &records[i].dateTime.year,
@@ -182,7 +182,7 @@ double dist(struct Location *p1, struct Location *p2) {
 }
 
 double toRadian(double x) {
-    return x * PI_RAD / PI_DEG;
+    return x * (PI_RAD / PI_DEG);
 }
 
 double squared(double x) {
@@ -191,8 +191,8 @@ double squared(double x) {
 
 void printRecord(struct Record *record, struct Location *referencePoint) {
     printf("Accident: #%d\n", record->ID);
-    printf("Location: <%lf, %lf>\n", record->location.lat,
-           record->location.lng);
+    printf("Location: <%lf, %lf>\n", record->location.lng,
+           record->location.lat);
     printf("Date: %d/%d/%d\n", record->dateTime.day, record->dateTime.month,
            record->dateTime.year);
     printf("Time: %02d\n", record->dateTime.hour);
