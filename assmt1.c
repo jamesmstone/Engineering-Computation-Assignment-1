@@ -1,3 +1,12 @@
+/*
+ * Assignment 1
+ * Engineering Computation
+ * Sem 2 2017 Uni Melb
+ * James Stone
+ * stone1@student.unimelb.edu.au
+ * 761353
+ */
+
 #include <stdio.h>
 #include <math.h>
 #include <string.h>
@@ -83,6 +92,12 @@ int main() {
     return 0;
 }
 
+/*
+ * Performs Stage 3
+ * Takes:   an array of records to fill
+ *          an integer representing the number of records in array.
+ * Returns: nothing
+ */
 void stage3(struct Record *records, int numRecords) {
     stagePrint(3);
     printf("Number of accidents: %d\n", numRecords);
@@ -93,6 +108,12 @@ void stage3(struct Record *records, int numRecords) {
            getDaysOfTheWeekStr(mostFrequentDay), occurrences);
 }
 
+/*
+ * Performs Stage 2
+ * Takes:   an array of records to fill
+ *          an integer representing the number of records in array.
+ * Returns: nothing
+ */
 void stage2(struct Record *records, int numRecords,
             struct Location *reference) {
     stagePrint(2);
@@ -102,11 +123,26 @@ void stage2(struct Record *records, int numRecords,
     }
 }
 
+/*
+ * Performs Stage 1
+ * Takes:   a pointer to a record
+ *          a pointer to a Location that will be used as the reference location.
+ * Returns: nothing
+ */
 void stage1(struct Record *records, struct Location *reference) {
     stagePrint(1);
     printRecord(&records[0], reference);
 }
 
+/*
+ * Calculates the most frequent day of the week for a group of records,
+ * In case of tie, max day is the earliest day in week.
+ * Takes:   an array of records
+ *          an integer representing the number of records in array.
+ *          a pointer for a day, that will be filled with the most frequent day, in an array.
+ *          a pointer representing the number of occurances the most frequent day occurs on
+ * Returns: nothing
+ */
 void
 getMostFrequentDay(struct Record *records, int numRecords, daysOfTheWeek *day,
                    int *occurrences) {
@@ -117,18 +153,33 @@ getMostFrequentDay(struct Record *records, int numRecords, daysOfTheWeek *day,
         dayCount[records[i].dateTime.dayOfWeek]++;
         if (dayCount[records[i].dateTime.dayOfWeek] > *occurrences) {
             *occurrences = dayCount[records[i].dateTime.dayOfWeek];
-            *day = records[i].dateTime.dayOfWeek;
+        }
+    }
+
+    for (i = 0; i < DAYS_IN_WEEK - 1; i++) {
+        if (dayCount[i] == *occurrences) {
+            *day = (daysOfTheWeek) i;
+            return; /* leave early as we have found the first max */
         }
     }
 }
 
+/*
+ * Prints a records details along with a representation of how far it is from a reference point
+ * Takes:   a pointer to the record that is to be printed
+ *          a pointer to a reference location.
+ * Returns: nothing
+ */
 void
 printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
     double distance = dist(&record->location, referencePoint);
     assert(distance <= MAX_DIST && distance >= MIN_DIST);
+
+    /* Print record details */
     printf("Accident: #%d, distance to reference: %05.02lf ", record->ID,
            distance);
-    /* Distance Bar */
+
+    /* Print Distance Bar */
     printf("|");
     int i;
     for (i = 0; i < ceil(distance); i++) {
@@ -138,6 +189,11 @@ printRecordAndDistance(struct Record *record, struct Location *referencePoint) {
     printf("\n");
 }
 
+/*
+ * Reads in records from stdin
+ * Takes:   an array of records to fill
+ * Returns: integer number of records read
+ */
 int readRecords(struct Record *records) {
     int i = 0;
     char dayOfWeek[MAX_DOW_LEN + 1]; /* +1 for null byte */
@@ -171,6 +227,12 @@ int readRecords(struct Record *records) {
     return i;
 }
 
+/*
+ * Calculates the distance across the earths surface between two points
+ * Takes:   a pointer to a location
+ *          a pointer to a second location
+ * Returns: a double representing the distance in meters/
+ */
 double dist(struct Location *p1, struct Location *p2) {
     double chord_length =
             squared(sin(toRadian(p2->lat - p1->lat) / 2.0)) +
@@ -181,14 +243,30 @@ double dist(struct Location *p1, struct Location *p2) {
     return 6371.0 * angle_distance;
 }
 
+/*
+ * Converts a Degree value to it's Radian equivalent.
+ * Takes:   a double, the degree value
+ * Returns: a double, the value in radians
+ */
 double toRadian(double x) {
     return x * (PI_RAD / PI_DEG);
 }
 
+/*
+ * Squares a number
+ * Takes:   a double to be squared
+ * Returns: a double representing the squared value.
+ */
 double squared(double x) {
     return x * x;
 }
 
+/*
+ * Prints a records details
+ * Takes:   a pointer to the record that is to be printed
+ *          a pointer to a reference location.
+ * Returns: nothing
+ */
 void printRecord(struct Record *record, struct Location *referencePoint) {
     printf("Accident: #%d\n", record->ID);
     printf("Location: <%lf, %lf>\n", record->location.lng,
@@ -200,11 +278,22 @@ void printRecord(struct Record *record, struct Location *referencePoint) {
            dist(&record->location, referencePoint));
 }
 
+/*
+ * Prints a new stage
+ * Takes:   an int, the stage number to print.
+ * Returns: nothing
+ */
 void stagePrint(int n) {
     if (n != 1) { printf("\n"); }
     printf("Stage %d\n==========\n", n);
 }
 
+/*
+ * Gets a String representation of the dayOfTheWeekEnum
+ * Takes:   a pointer to the record that is to be printed
+ *          a pointer to a reference location.
+ * Returns: a string (char array) for the day of the week.
+ */
 char *getDaysOfTheWeekStr(daysOfTheWeek day) {
     switch (day) {
         case Sunday:
