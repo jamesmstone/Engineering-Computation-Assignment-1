@@ -3,6 +3,6 @@ project(code)
 
 set(CMAKE_C_STANDARD 99)
 
-set(SOURCE_FILES main.c)
+set(SOURCE_FILES assmt1.c)
 add_executable(code ${SOURCE_FILES})
 target_link_libraries(code m)
