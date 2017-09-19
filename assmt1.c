@@ -30,7 +30,7 @@ struct Location {
 };
 
 typedef enum {
-    Sunday, Monday, Tuesday, Wednesday, Thursday, Friday, Saturday
+    Monday, Tuesday, Wednesday, Thursday, Friday, Saturday, Sunday
 } daysOfTheWeek;
 
 struct DateTimes {
